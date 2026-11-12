@@ -1,0 +1,102 @@
+<View gap="large">
+  <View gap="small">
+    <Text variant="display" weight="bold" leading="tight">Get tickets</Text>
+    <If condition="{{ salesCloses && sales === 'open' }}">
+      <View direction="row" gap="small" align="center">
+        <Icon name="clock" tone="muted" size="small" />
+        <Text variant="caption" tone="muted">{{ salesCloses }}</Text>
+      </View>
+    </If>
+  </View>
+
+  <If condition="{{ sales === 'not-yet' }}">
+    <Notice title="Not on sale yet">Tickets go on sale soon. Come back then.</Notice>
+  </If>
+  <ElseIf condition="{{ sales === 'closed' }}">
+    <Notice title="Sales have closed">Online sales for the Royal Ball are over.</Notice>
+  </ElseIf>
+  <ElseIf condition="{{ soldOut }}">
+    <Notice tone="danger" title="Sold out">Every ticket and table has gone.</Notice>
+  </ElseIf>
+  <ElseIf condition="{{ liveError }}">
+    <Notice tone="warning" title="Tickets didn't load">{{ liveError }}</Notice>
+    <Button variant="secondary" onClick="loadLive">Try again</Button>
+  </ElseIf>
+
+  <!-- One group at a time, and one ticket type per order: choosing one hides the rest. -->
+  <Tabs value="{{ tab }}" variant="segmented" onChange="setTab">
+    <Tab value="individual" label="Individual" />
+    <Tab value="tables" label="Tables" />
+  </Tabs>
+
+  <!-- Individual tickets: a card each, more gold the higher the tier, with a stepper. -->
+  <If condition="{{ tab === 'individual' }}">
+    <View gap="medium">
+      <For each="{{ individual }}" item="ticket" key="id">
+        <View direction="row" justify="between" align="center" gap="medium" padding="medium" radius="large" background="{{ ticket.card }}">
+          <View gap="none" grow>
+            <Text weight="bold" tone="{{ ticket.tone }}">{{ ticket.name }}</Text>
+            <If condition="{{ ticket.detail }}">
+              <Text variant="caption" tone="{{ ticket.muted }}">{{ ticket.detail }}</Text>
+            </If>
+            <View direction="row" gap="small" align="center" paddingTop="small">
+              <Text variant="subtitle" weight="bold" tone="{{ ticket.tone }}" numeric>{{ ticket.priceLabel }}</Text>
+              <If condition="{{ ticket.leftLabel }}">
+                <Text variant="caption" tone="warning">{{ ticket.leftLabel }}</Text>
+              </If>
+            </View>
+          </View>
+          <If condition="{{ ticket.soldOut }}">
+            <Badge tone="danger">Sold out</Badge>
+          </If>
+          <ElseIf condition="{{ sales === 'open' && !loading && !liveError }}">
+            <Stepper value="{{ ticket.quantity }}" min="0" max="{{ ticket.max }}" data-id="{{ ticket.id }}" onChange="setQuantity" />
+          </ElseIf>
+          <ElseIf condition="{{ loading }}">
+            <Spinner size="small" />
+          </ElseIf>
+        </View>
+      </For>
+    </View>
+  </If>
+
+  <!-- Tables: a card each, more gold the higher the tier, chosen with one tap, with the price a guest to compare. -->
+  <If condition="{{ tab === 'tables' }}">
+    <View gap="medium">
+      <Text variant="caption" tone="muted">One pass lets in the whole table. Share it with your guests in Dash.</Text>
+      <For each="{{ tables }}" item="ticket" key="id">
+        <View direction="row" justify="between" align="center" gap="medium" padding="medium" radius="large" background="{{ ticket.card }}">
+          <View gap="none" grow>
+            <Text weight="bold" tone="{{ ticket.tone }}">{{ ticket.name }}</Text>
+            <Text variant="caption" tone="{{ ticket.muted }}">{{ ticket.detail }}</Text>
+            <View direction="row" gap="small" align="center" paddingTop="small">
+              <Text variant="subtitle" weight="bold" tone="{{ ticket.tone }}" numeric>{{ ticket.priceLabel }}</Text>
+              <If condition="{{ ticket.leftLabel }}">
+                <Text variant="caption" tone="warning">{{ ticket.leftLabel }}</Text>
+              </If>
+            </View>
+          </View>
+          <If condition="{{ ticket.soldOut }}">
+            <Badge tone="danger">Sold out</Badge>
+          </If>
+          <ElseIf condition="{{ sales === 'open' && !loading && !liveError }}">
+            <Chip label="{{ ticket.quantity > 0 ? 'Chosen' : 'Choose' }}" icon="{{ ticket.quantity > 0 ? 'check' : 'plus' }}" selected="{{ ticket.quantity > 0 }}" data-id="{{ ticket.id }}" onTap="chooseTable" />
+          </ElseIf>
+          <ElseIf condition="{{ loading }}">
+            <Spinner size="small" />
+          </ElseIf>
+        </View>
+      </For>
+    </View>
+  </If>
+
+  <If condition="{{ chosen }}">
+    <View direction="row" justify="center">
+      <Text variant="caption"><Link tone="muted" onTap="clearChoice">Choose a different ticket</Link></Text>
+    </View>
+  </If>
+
+  <Footer>
+    <Button disabled="{{ count === 0 }}" onClick="checkout">{{ count === 0 ? 'Choose your tickets' : 'Continue · ' + totalLabel }}</Button>
+  </Footer>
+</View>

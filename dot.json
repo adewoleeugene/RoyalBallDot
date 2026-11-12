@@ -1,0 +1,14 @@
+{
+  "id": "<monime-Internal-Id>",
+  "$schema": "https://unpkg.com/@monimesl/dot-runtime/dot.schema.json",
+  "package": "sl.lawyerssociety.royalball2026",
+  "name": "Royal Ball 2026",
+  "version": "0.1.0",
+  "permissions": {
+    "payments": "Pay for your Royal Ball tickets and tables",
+    "account": "Put your name and number on your tickets"
+  },
+  "dash": {
+    "minApiVersion": "1.0"
+  }
+}

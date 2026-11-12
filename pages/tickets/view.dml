@@ -1,0 +1,66 @@
+<View gap="large">
+  <View gap="small">
+    <Text variant="display" weight="bold" leading="tight">Your passes</Text>
+    <Text tone="muted">{{ eventWhen }}</Text>
+  </View>
+
+  <If condition="{{ loading }}">
+    <Skeleton shape="text" lines="4" />
+  </If>
+  <ElseIf condition="{{ error }}">
+    <Notice tone="danger" title="Your passes didn't load">{{ error }}</Notice>
+  </ElseIf>
+  <ElseIf condition="{{ orders.length === 0 && waiting.length === 0 }}">
+    <EmptyState icon="ticket" title="No passes yet" text="Passes you buy or are sent show here, even without signal.">
+      <Button variant="secondary" onClick="backToEvent">See tickets</Button>
+    </EmptyState>
+  </ElseIf>
+  <Else>
+    <For each="{{ waiting }}" item="order" key="orderId">
+      <Notice tone="info" title="Waiting for a payment">{{ order.summary }} · {{ order.totalLabel }}. Your passes show here once it goes through.</Notice>
+    </For>
+
+    <!-- One card per order. A single pass (a table, or one ticket) is the card itself: tap it for the QR. -->
+    <For each="{{ orders }}" item="order" key="orderId">
+      <If condition="{{ order.tickets.length === 1 }}">
+        <View direction="row" gap="medium" align="center" padding="medium" background="surface" border="subtle" radius="large" data-order="{{ order.orderId }}" data-index="0" onTap="open">
+          <View padding="small" radius="medium" background="raised">
+            <Icon name="qr-code" />
+          </View>
+          <View gap="none" grow>
+            <Text variant="subtitle" weight="bold">{{ order.title }}</Text>
+            <Text variant="caption" tone="muted">{{ order.subtitle }}</Text>
+            <If condition="{{ order.tickets[0].badge }}">
+              <Text variant="caption" tone="muted">{{ order.tickets[0].badge }}</Text>
+            </If>
+          </View>
+          <Icon name="chevron-right" tone="muted" size="small" />
+        </View>
+      </If>
+      <Else>
+      <View gap="medium" padding="medium" background="surface" border="subtle" radius="large">
+        <View direction="row" justify="between" align="start" gap="medium">
+          <View gap="none" grow>
+            <Text variant="subtitle" weight="bold">{{ order.title }}</Text>
+            <Text variant="caption" tone="muted">{{ order.subtitle }}</Text>
+          </View>
+          <Icon name="ticket" tone="muted" />
+        </View>
+
+        <If condition="{{ order.guestCount > 0 }}">
+          <View gap="small">
+            <ProgressBar value="{{ order.progress }}" />
+            <Text variant="caption" tone="muted">{{ order.progressLabel }}</Text>
+          </View>
+        </If>
+
+        <List>
+          <For each="{{ order.tickets }}" item="ticket" key="id">
+            <ListItem icon="qr-code" title="{{ ticket.title }}" subtitle="{{ ticket.subtitle }}" value="{{ ticket.badge }}" data-order="{{ order.orderId }}" data-index="{{ ticket.index }}" onTap="open" />
+          </For>
+        </List>
+      </View>
+      </Else>
+    </For>
+  </Else>
+</View>

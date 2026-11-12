@@ -1,0 +1,108 @@
+<View gap="large">
+  <Toast message="{{ toast }}" tone="danger" onHide="clearToast" />
+
+  <!-- Passes already bought come first, saying what's left to do: name guests, send passes. -->
+  <If condition="{{ heldCount > 0 }}">
+    <View direction="row" gap="medium" align="center" padding="medium" background="surface" border="subtle" radius="large" onTap="openTickets">
+      <Icon name="ticket" />
+      <View gap="none" grow>
+        <Text weight="bold">{{ heldLabel }}</Text>
+        <Text variant="caption" tone="{{ heldNeedsAction ? 'warning' : 'muted' }}">{{ heldStatus }}</Text>
+      </View>
+      <Icon name="chevron-right" tone="muted" size="small" />
+    </View>
+  </If>
+
+  <!-- A slim banner: people opening this already know the event. -->
+  <Image src="{{ event.poster }}" alt="The Lawyers’ Society Royal Ball Dinner" fit="cover" shape="rounded" />
+
+  <View gap="small">
+    <Text variant="title" weight="bold" leading="tight">{{ event.title }}</Text>
+    <Text tone="muted">{{ event.summary }}</Text>
+  </View>
+
+  <!-- The essentials side by side: one card, three equal columns. -->
+  <View background="surface" border="subtle" radius="large" paddingTop="medium" paddingBottom="medium">
+    <Grid columns="3" gap="none">
+      <For each="{{ event.facts }}" item="fact" key="id">
+        <View gap="small" align="center" paddingStart="small" paddingEnd="small">
+          <!-- Dash has no dress icon, so dress code uses our own, drawn to match. -->
+          <If condition="{{ fact.icon === 'dress' }}">
+            <Image src="statics/dress.png" alt="" width="16" height="16" fit="contain" shape="square" />
+          </If>
+          <Else>
+            <Icon name="{{ fact.icon }}" tone="muted" size="small" />
+          </Else>
+          <View gap="none" align="center">
+            <Text weight="bold" align="center" maxLines="1">{{ fact.top }}</Text>
+            <Text weight="bold" align="center" maxLines="1">{{ fact.bottom }}</Text>
+            <Text variant="caption" tone="muted" align="center">{{ fact.caption }}</Text>
+          </View>
+        </View>
+      </For>
+    </Grid>
+  </View>
+
+  <!-- The full story opens in a sheet. -->
+  <View direction="row" gap="medium" align="center" padding="medium" background="surface" border="subtle" radius="large" onTap="openAbout">
+    <Icon name="info" tone="muted" />
+    <View gap="none" grow>
+      <Text weight="medium">About the evening</Text>
+      <Text variant="caption" tone="muted">Programme, passes and paying cash</Text>
+    </View>
+    <Icon name="chevron-right" tone="muted" size="small" />
+  </View>
+
+  <If condition="{{ event.phone }}">
+    <View direction="row" justify="center" align="center" gap="small" paddingTop="small" onTap="call">
+      <Icon name="phone" tone="muted" size="small" />
+      <Text weight="medium">Call the Ticket Lead</Text>
+    </View>
+  </If>
+
+  <Sheet open="{{ aboutOpen }}" title="About the evening" showCloseIcon onClose="closeAbout">
+    <View gap="medium">
+      <RichText markdown="{{ event.description }}" />
+      <If condition="{{ event.phone }}">
+        <Button variant="secondary" onClick="call">Call the Ticket Lead</Button>
+      </If>
+    </View>
+  </Sheet>
+
+  <!-- Always on screen: buying is one tap from anywhere on the page, with Share beside it. -->
+  <Footer>
+    <View gap="small">
+      <!-- On the night, with passes on the phone, the pass is what matters. -->
+      <If condition="{{ eventDay && heldCount > 0 }}">
+        <View direction="row" gap="small" align="center">
+          <View grow>
+            <Button onClick="showPass">{{ heldCount === 1 ? 'Show my pass' : 'Show my passes' }}</Button>
+          </View>
+          <Button variant="secondary" onClick="share"><Icon name="share" /></Button>
+        </View>
+        <If condition="{{ sales === 'open' }}">
+          <Text variant="caption" align="center"><Link onTap="getTickets">Get more tickets</Link></Text>
+        </If>
+      </If>
+      <Else>
+      <View direction="row" gap="small" align="center">
+        <View grow>
+          <If condition="{{ sales === 'open' }}">
+            <Button onClick="getTickets">Get tickets</Button>
+          </If>
+          <ElseIf condition="{{ sales === 'not-yet' }}">
+            <Button disabled>Tickets go on sale soon</Button>
+          </ElseIf>
+          <Else>
+            <Button disabled>Online sales have closed</Button>
+          </Else>
+        </View>
+        <Button variant="secondary" onClick="share"><Icon name="share" /></Button>
+      </View>
+      <If condition="{{ salesCloses && sales === 'open' }}">
+        <Text variant="caption" tone="muted" align="center">{{ salesCloses }}</Text>
+      </If>
+      </Else>
+    </View>
+  </Footer>
+</View>

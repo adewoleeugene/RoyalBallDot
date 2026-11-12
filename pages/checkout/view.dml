@@ -1,0 +1,96 @@
+<View gap="large">
+  <View gap="small">
+    <Text variant="display" weight="bold" leading="tight">Your order</Text>
+    <Text tone="muted">{{ countLabel }}</Text>
+  </View>
+
+  <!-- Each line: the ticket on the left with how many it lets in, the amount on the right. -->
+  <View gap="small" border="subtle" radius="large" background="surface" padding="medium">
+    <For each="{{ lines }}" item="line" key="id">
+      <View direction="row" justify="between" align="start" gap="medium">
+        <View gap="none" grow>
+          <Text weight="medium">{{ line.label }}</Text>
+          <Text variant="caption" tone="muted">{{ line.meta }}</Text>
+        </View>
+        <Text numeric>{{ line.amountLabel }}</Text>
+      </View>
+    </For>
+    <Divider />
+    <View direction="row" justify="between" align="center" gap="medium">
+      <Text weight="bold">Total</Text>
+      <Text weight="bold" numeric>{{ totalLabel }}</Text>
+    </View>
+  </View>
+
+  <If condition="{{ hasTable }}">
+    <View gap="small">
+      <Text variant="title" weight="bold">Table card</Text>
+      <Input label="Name on the table card" value="{{ tableName }}" error="{{ tableError }}" hint="Such as your chambers, company or family name" maxLength="50" onChange="setTableName" />
+    </View>
+  </If>
+
+  <!-- Who's booking. Filled from Dash when the person allows it, else typed. -->
+  <View gap="small">
+    <Text variant="title" weight="bold">Booked by</Text>
+    <If condition="{{ typing }}">
+      <Input label="Full name" value="{{ buyerName }}" error="{{ nameError }}" maxLength="60" onChange="setName" />
+      <Input label="Phone number" type="phone" prefix="+232" placeholder="76 123456" value="{{ buyerPhone }}" error="{{ phoneError }}" hint="The organiser may call this number about the event" onChange="setPhone" />
+    </If>
+    <ElseIf condition="{{ buyerName }}">
+      <View direction="row" align="center" gap="medium">
+        <Avatar name="{{ buyerName }}" size="medium" />
+        <View gap="none" grow>
+          <Text weight="medium">{{ buyerName }}</Text>
+          <Text variant="caption" tone="muted">{{ buyerPhone }}</Text>
+        </View>
+        <Text><Link tone="muted" onTap="editBuyer">Change</Link></Text>
+      </View>
+    </ElseIf>
+    <Else>
+      <Text tone="muted">When you pay, Dash will ask to share your name and number with the organiser, so your pass carries your name.</Text>
+      <Text variant="caption"><Link tone="muted" onTap="editBuyer">Type them instead</Link></Text>
+    </Else>
+  </View>
+
+  <If condition="{{ hasTable }}">
+    <View direction="row" gap="small" align="start">
+      <Icon name="users" tone="muted" size="small" />
+      <Text variant="caption" tone="muted">You'll get one table pass that lets in all {{ countLabel }}. Share it with your table in Dash.</Text>
+    </View>
+  </If>
+  <ElseIf condition="{{ count > 1 }}">
+    <View direction="row" gap="small" align="start">
+      <Icon name="users" tone="muted" size="small" />
+      <Text variant="caption" tone="muted">The first pass is yours. After you pay, add each guest's name and send them their own pass in Dash.</Text>
+    </View>
+  </ElseIf>
+
+  <If condition="{{ stage === 'pending' }}">
+    <Notice tone="info" title="Waiting for your payment">Approve the payment on your phone. Your passes appear here as soon as it goes through.</Notice>
+    <Button variant="secondary" loading="{{ checking }}" onClick="checkAgain">Check again</Button>
+  </If>
+  <ElseIf condition="{{ stage === 'issuing' }}">
+    <Notice tone="info" title="Paid. Getting your passes">This takes a few seconds.</Notice>
+    <Button variant="secondary" loading="{{ checking }}" onClick="checkAgain">Check again</Button>
+  </ElseIf>
+  <ElseIf condition="{{ note }}">
+    <Notice tone="{{ noteTone }}">{{ note }}</Notice>
+  </ElseIf>
+
+  <If condition="{{ holdLabel && stage !== 'issuing' }}">
+    <View direction="row" gap="small" align="center">
+      <Icon name="clock" tone="muted" size="small" />
+      <Text variant="caption" tone="muted">{{ holdLabel }}</Text>
+    </View>
+  </If>
+
+  <If condition="{{ refundPolicy }}">
+    <Text variant="caption" tone="muted">{{ refundPolicy }}</Text>
+  </If>
+
+  <If condition="{{ stage === 'review' || stage === 'working' }}">
+    <Footer>
+      <Button loading="{{ stage === 'working' }}" onClick="pay">Pay {{ totalLabel }}</Button>
+    </Footer>
+  </If>
+</View>

@@ -1,0 +1,84 @@
+<View gap="large">
+  <Toast message="{{ toast }}" tone="{{ toastTone }}" onHide="clearToast" />
+
+  <If condition="{{ loading }}">
+    <Skeleton shape="box" height="420" />
+  </If>
+  <ElseIf condition="{{ notFound }}">
+    <EmptyState icon="ticket" title="Pass not found" text="It isn't on this phone.">
+      <Button variant="secondary" onClick="openTickets">Your passes</Button>
+    </EmptyState>
+  </ElseIf>
+  <Else>
+    <View gap="small">
+      <Text variant="display" weight="bold" leading="tight">{{ title }}</Text>
+      <Text tone="muted">{{ when }}</Text>
+      <Text tone="muted">{{ venue }}</Text>
+      <If condition="{{ fromLabel }}">
+        <Text variant="caption" tone="muted">{{ fromLabel }}</Text>
+      </If>
+    </View>
+
+    <!-- One slide per guest. The QR sits on a light panel, since a code scans best dark on light. -->
+    <Carousel index="{{ index }}" indicator="{{ slides.length > 1 ? 'dots' : 'none' }}" gap="medium" onChange="setIndex">
+      <For each="{{ slides }}" item="slide" key="id">
+        <View gap="medium" align="center" padding="large" background="surface" border="subtle" radius="large">
+          <View direction="row" justify="between" align="center" width="fill">
+            <Text variant="subtitle" weight="bold">{{ slide.ticketName }}</Text>
+            <Text variant="caption" tone="muted">{{ slide.position }}</Text>
+          </View>
+          <QRCode value="{{ slide.code }}" size="220" label="Pass for {{ slide.holderLabel }}" />
+          <View gap="none" align="center">
+            <Text weight="bold" tone="{{ slide.named ? 'default' : 'muted' }}">{{ slide.holderLabel }}</Text>
+            <If condition="{{ slide.tableName }}">
+              <Text variant="caption" tone="muted">Table: {{ slide.tableName }}</Text>
+            </If>
+            <Text variant="caption" tone="muted" numeric>{{ slide.shortId }}</Text>
+          </View>
+          <View direction="row" gap="small" align="center">
+            <If condition="{{ slide.demo }}">
+              <Badge tone="warning">Demo pass · not valid</Badge>
+            </If>
+            <If condition="{{ slide.sent }}">
+              <Badge tone="success">{{ slide.tablePass ? 'Shared' : 'Sent' }}</Badge>
+            </If>
+          </View>
+          <If condition="{{ canManage && slide.tablePass }}">
+            <!-- One code for the whole table: share it with the people at the table. -->
+            <View gap="small" width="fill">
+              <Button variant="secondary" data-id="{{ slide.id }}" onClick="send">{{ slide.sent ? 'Share with the table again' : 'Share with your table' }}</Button>
+              <Text variant="caption" tone="muted" align="center">Everyone you share it with gets this same pass. Each scan lets one person in.</Text>
+            </View>
+          </If>
+          <ElseIf condition="{{ canManage }}">
+            <View direction="row" gap="small" width="fill">
+              <View grow>
+                <Button variant="secondary" data-id="{{ slide.id }}" onClick="editGuest">{{ slide.named ? 'Change name' : 'Add name' }}</Button>
+              </View>
+              <View grow>
+                <Button variant="secondary" data-id="{{ slide.id }}" onClick="send">{{ slide.sent ? 'Send again' : 'Send pass' }}</Button>
+              </View>
+            </View>
+          </ElseIf>
+          <ElseIf condition="{{ slide.tablePass }}">
+            <Text variant="caption" tone="muted" align="center">This pass is shared by your table. Each scan lets one person in.</Text>
+          </ElseIf>
+        </View>
+      </For>
+    </Carousel>
+
+    <Text variant="caption" tone="muted" align="center">Show this at the door. It works without signal, and your screen stays bright while it's open.</Text>
+  </Else>
+
+  <!-- Naming a guest. Their number is optional, for the organiser to reach them on the night. -->
+  <Sheet open="{{ editing }}" title="{{ editTitle }}" showCloseIcon onClose="closeEdit">
+    <View gap="medium">
+      <If condition="{{ sheetNote }}">
+        <Notice tone="{{ sheetTone }}">{{ sheetNote }}</Notice>
+      </If>
+      <Input label="Guest's full name" value="{{ editName }}" error="{{ editNameError }}" maxLength="60" onChange="setEditName" />
+      <Input label="Their phone number (optional)" type="phone" prefix="+232" placeholder="76 123456" value="{{ editPhone }}" error="{{ editPhoneError }}" onChange="setEditPhone" />
+      <Button loading="{{ saving }}" onClick="saveGuest">{{ sendAfterSave ? 'Save and send' : 'Save' }}</Button>
+    </View>
+  </Sheet>
+</View>

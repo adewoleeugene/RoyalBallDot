@@ -1,0 +1,15 @@
+<View gap="large">
+  <View gap="small">
+    <Text variant="display" weight="bold" leading="tight">Your pass</Text>
+    <Text tone="muted">{{ title }}</Text>
+    <Text tone="muted">{{ when }}</Text>
+  </View>
+
+  <If condition="{{ loading }}">
+    <Skeleton shape="box" height="320" />
+  </If>
+  <ElseIf condition="{{ error }}">
+    <Notice tone="danger" title="This pass didn't open">{{ error }}</Notice>
+    <Button variant="secondary" onClick="backToEvent">See the Royal Ball</Button>
+  </ElseIf>
+</View>
