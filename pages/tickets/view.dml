@@ -24,7 +24,7 @@
     <For each="{{ orders }}" item="order" key="orderId">
       <If condition="{{ order.tickets.length === 1 }}">
         <View direction="row" gap="medium" align="center" padding="medium" background="surface" border="subtle" radius="large" data-order="{{ order.orderId }}" data-index="0" onTap="open">
-          <View padding="small" radius="medium" background="raised">
+          <View padding="small" radius="medium" background="muted">
             <Icon name="qr-code" />
           </View>
           <View gap="none" grow>
