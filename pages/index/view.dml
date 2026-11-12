@@ -41,17 +41,11 @@
     <Icon name="chevron-right" tone="muted" size="small" />
   </View>
 
-  <!-- Quieter actions as a row of links: calling the Ticket Lead, and sharing the ball. -->
-  <View direction="row" justify="center" align="center" gap="large" paddingTop="small">
-    <If condition="{{ event.phone }}">
-      <View direction="row" align="center" gap="small" onTap="call">
-        <Icon name="phone" tone="muted" size="small" />
-        <Text weight="medium">Call the Ticket Lead</Text>
-      </View>
-    </If>
+  <!-- Sharing the ball, as a quiet link. Calling the Ticket Lead lives in the About sheet. -->
+  <View direction="row" justify="center" align="center" paddingTop="small">
     <View direction="row" align="center" gap="small" onTap="share">
       <Icon name="share" tone="muted" size="small" />
-      <Text weight="medium">Share</Text>
+      <Text weight="medium">Share this event</Text>
     </View>
   </View>
 
